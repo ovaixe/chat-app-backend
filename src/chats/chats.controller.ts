@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ChatsService } from './chats.service';
 
-@Controller('api')
+@Controller('api/chats')
 export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
 
@@ -10,13 +10,24 @@ export class ChatsController {
     return this.chatsService.getHello();
   }
 
-  @Get('/chat')
+  @Get('/all-chats')
   async Chat() {
     try {
       const messages = await this.chatsService.getMessages();
       return { data: messages, isSuccess: true, status: 200 };
     } catch (err) {
       console.log(`[ERROR][ChatsController:Chat]: `, err);
+      return { error: err, isSuccess: false, status: 400 };
+    }
+  }
+
+  @Get('/clear-chats')
+  async ClearChats() {
+    try {
+      const resp = await this.chatsService.clearChats();
+      return { data: resp, isSuccess: true, status: 200 };
+    } catch (err) {
+      console.log(`[ERROR][ChatsController:ClearChats]: `, err);
       return { error: err, isSuccess: false, status: 400 };
     }
   }

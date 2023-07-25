@@ -16,6 +16,15 @@ export class ChatsService {
     return await this.chatModel.find().exec();
   }
 
+  async clearChats(): Promise<object> {
+    try {
+      const resp = await this.chatModel.deleteMany({});
+      return resp;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   getHello(): string {
     return 'Hello From Chat App!';
   }
