@@ -12,7 +12,6 @@ import { Socket, Server } from 'socket.io';
 import { ChatsService } from './chats.service';
 import { UserInterface } from 'src/interfaces/user.interface';
 import { Message } from 'src/interfaces/chat.interface';
-import { Room } from 'src/interfaces/chat.interface';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UseGuards } from '@nestjs/common';
 
