@@ -12,7 +12,10 @@ export class Chat {
   message: string;
 
   @Prop()
-  createdAt: Date;
+  timeSent: Date;
+
+  @Prop()
+  roomName: string;
 }
 
 export const ChatSchema = SchemaFactory.createForClass(Chat);
