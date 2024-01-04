@@ -1,17 +1,9 @@
-import {
-  Body,
-  Controller,
-  Post,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthGuard } from './auth.guard';
 import { SignInDto } from './dto/signIn.dto';
 import { SignUpDto } from './dto/signUp.dto';
 
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
@@ -25,7 +17,7 @@ export class AuthController {
       );
       return { status: 200, isSuccess: true, data: user };
     } catch (err) {
-      console.log('[ERROR][AuthController:signIn]: ', err);
+      console.log('[ERROR][AuthController:signIn]: ', err.message);
       return { status: 400, isSuccess: false, error: err.message };
     }
   }
@@ -40,7 +32,7 @@ export class AuthController {
       );
       return { status: 200, isSuccess: true, data: user };
     } catch (err) {
-      console.log('[ERROR][AuthController:signUp]: ', err);
+      console.log('[ERROR][AuthController:signUp]: ', err.message);
       return { status: 400, isSuccess: false, error: err.message };
     }
   }

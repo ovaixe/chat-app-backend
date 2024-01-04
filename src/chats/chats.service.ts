@@ -15,7 +15,7 @@ export class ChatsService {
       const createdMessage = new this.chatModel(chat);
       return createdMessage.save();
     } catch (err) {
-      console.log('[ERROR][ChatsService:createMessage]: ', err);
+      console.log('[ERROR][ChatsService:createMessage]: ', err.message);
       throw err;
     }
   }
@@ -24,7 +24,7 @@ export class ChatsService {
     try {
       return await this.chatModel.find().exec();
     } catch (err) {
-      console.log('[ERROR][ChatsService:getMessages]: ', err);
+      console.log('[ERROR][ChatsService:getMessages]: ', err.message);
       throw err;
     }
   }
@@ -34,7 +34,7 @@ export class ChatsService {
       const resp = await this.chatModel.deleteMany({});
       return resp;
     } catch (err) {
-      console.log('[ERROR][ChatsService:clearChats]: ', err);
+      console.log('[ERROR][ChatsService:clearChats]: ', err.message);
       throw err;
     }
   }
@@ -48,7 +48,7 @@ export class ChatsService {
       }
       throw new Error('Room with same name already exists!');
     } catch (err) {
-      console.log('[Error][ChatsService:addRoom]: ', err);
+      console.log('[Error][ChatsService:addRoom]: ', err.message);
       throw err;
     }
   }
@@ -60,7 +60,7 @@ export class ChatsService {
         this.rooms = this.rooms.filter((room) => room.name !== roomName);
       }
     } catch (err) {
-      console.log('[Error][ChatsService:removeRoom]: ', err);
+      console.log('[Error][ChatsService:removeRoom]: ', err.message);
       throw err;
     }
   }
@@ -70,7 +70,7 @@ export class ChatsService {
       const roomIndex = await this.getRoomByName(hostName);
       return this.rooms[roomIndex].host;
     } catch (err) {
-      console.log('[Error][ChatsService:getRoomHost]: ', err);
+      console.log('[Error][ChatsService:getRoomHost]: ', err.message);
       throw err;
     }
   }
@@ -80,7 +80,7 @@ export class ChatsService {
       const roomIndex = this.rooms.findIndex((room) => room?.name === roomName);
       return roomIndex;
     } catch (err) {
-      console.log('[Error][ChatsService:getRoomByName]: ', err);
+      console.log('[Error][ChatsService:getRoomByName]: ', err.message);
       throw err;
     }
   }
@@ -100,7 +100,7 @@ export class ChatsService {
         return resp;
       }
     } catch (err) {
-      console.log('[Error][ChatsService:addUserToRoom]: ', err);
+      console.log('[Error][ChatsService:addUserToRoom]: ', err.message);
       throw err;
     }
   }
@@ -115,7 +115,10 @@ export class ChatsService {
       });
       return filteredRooms;
     } catch (err) {
-      console.log('[Error][ChatsService:findRoomsByUserSocketId]: ', err);
+      console.log(
+        '[Error][ChatsService:findRoomsByUserSocketId]: ',
+        err.message,
+      );
       throw err;
     }
   }
@@ -127,7 +130,10 @@ export class ChatsService {
         await this.removeUserFromRoom(socketId, room.name);
       }
     } catch (err) {
-      console.log('[Error][ChatsService:removeUserFromAllRooms]: ', err);
+      console.log(
+        '[Error][ChatsService:removeUserFromAllRooms]: ',
+        err.message,
+      );
       throw err;
     }
   }
@@ -146,7 +152,7 @@ export class ChatsService {
       }
       return true;
     } catch (err) {
-      console.log('[Error][ChatsService:removeUserFromRoom]: ', err);
+      console.log('[Error][ChatsService:removeUserFromRoom]: ', err.message);
       throw err;
     }
   }
@@ -158,20 +164,16 @@ export class ChatsService {
   async isUserJoined(roomName: string, user: UserInterface): Promise<boolean> {
     try {
       const roomIndex = await this.getRoomByName(roomName);
-      if (roomIndex !== -1) {
-        const isJoined = this.rooms[roomIndex].users.find(
-          (u) => u.socketId === user.socketId,
-        );
-        if (isJoined) return true;
-        else return false;
-      } else return false;
+      if (roomIndex === -1) return false;
+      const isJoined = this.rooms[roomIndex].users.find(
+        (u) => u.socketId === user.socketId,
+      );
+      if (!isJoined) return false;
+      return true;
     } catch (err) {
-      console.log('[Error][ChatsService:isUserJoined]: ', err);
+      err.scope = err.scope ? err.scope : 'isUserJoined';
+      console.log('[Error][ChatsService:isUserJoined]: ', err.message);
       throw err;
     }
-  }
-
-  getHello(): string {
-    return 'Hello From Chat App!';
   }
 }

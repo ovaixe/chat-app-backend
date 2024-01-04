@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
@@ -21,7 +21,7 @@ export class UsersService {
         throw new Error('No user found with this username!');
       }
     } catch (err) {
-      console.log('[ERROR][UsersService:findOne]: ', err);
+      console.log('[ERROR][UsersService:findOne]: ', err.message);
       throw err;
     }
   }
@@ -33,13 +33,13 @@ export class UsersService {
         userName: username,
         password: hashedPassword,
       });
-      if (user) {
-        return await user.save();
-      } else {
-        throw new Error('User Not Created!');
-      }
+      return await user.save();
     } catch (err) {
-      console.log('[ERROR][UsersService:createOne]: ', err);
+      console.log('[ERROR][UsersService:createOne]: ', err.message);
+      if (err.code === 11000) {
+        // Duplicate key error (e.g., unique index violation)
+        throw new ConflictException('Username already exists');
+      }
       throw err;
     }
   }

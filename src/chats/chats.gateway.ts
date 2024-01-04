@@ -10,10 +10,10 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { ChatsService } from './chats.service';
+import { AuthService } from 'src/auth/auth.service';
 import { UserInterface } from 'src/interfaces/user.interface';
 import { Message } from 'src/interfaces/chat.interface';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { UseGuards } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(8080, {
   cors: {
@@ -23,11 +23,15 @@ import { UseGuards } from '@nestjs/common';
 export class ChatsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private chatsService: ChatsService) {}
+  constructor(
+    private chatsService: ChatsService,
+    private authService: AuthService,
+  ) {}
 
   @WebSocketServer() server: Server;
 
-  @UseGuards(AuthGuard)
+  private logger = new Logger('ChatsGateWay');
+
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @ConnectedSocket()
@@ -36,16 +40,15 @@ export class ChatsGateway
   ): Promise<boolean> {
     try {
       await this.chatsService.createMessage(payload);
-      console.log('newMsg: ', payload);
+      this.logger.log('newMsg: ', payload);
       this.server.to(payload.roomName).emit('newIncomingMessage', payload);
       return true;
     } catch (err) {
-      console.log('[ERROR][ChatsGateway:handleMessage]: ', err);
+      this.logger.error('[handleMessage]: ', err.message);
       return false;
     }
   }
 
-  @UseGuards(AuthGuard)
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(
     @MessageBody() payload: { roomName: string; user: UserInterface },
@@ -58,7 +61,7 @@ export class ChatsGateway
         );
         if (isJoined) return true;
         else {
-          console.log(
+          this.logger.log(
             `${payload.user.socketId} is joining ${payload.roomName}`,
           );
           this.server.in(payload.user.socketId).socketsJoin(payload.roomName);
@@ -74,12 +77,11 @@ export class ChatsGateway
         }
       } else return false;
     } catch (err) {
-      console.log('[ERROR][ChatsGateway:handleJoinRoom]: ', err);
+      this.logger.error('[handleJoinRoom]: ', err.message);
       return false;
     }
   }
 
-  @UseGuards(AuthGuard)
   @SubscribeMessage('leaveRoom')
   async handleLeaveRoom(
     @MessageBody() payload: { roomName: string; user: UserInterface },
@@ -101,12 +103,11 @@ export class ChatsGateway
         return true;
       } else return false;
     } catch (err) {
-      console.log('[ERROR][ChatsGateway:handleLeaveRoom]: ', err);
+      this.logger.error('[handleLeaveRoom]: ', err.message);
       return false;
     }
   }
 
-  @UseGuards(AuthGuard)
   @SubscribeMessage('getRooms')
   async getAllRooms(): Promise<boolean> {
     try {
@@ -114,24 +115,27 @@ export class ChatsGateway
       this.server.emit('allRooms', rooms);
       return true;
     } catch (err) {
-      console.log('[ERROR][ChatsGateway:getAllRooms]: ', err);
+      this.logger.error('[getAllRooms]: ', err.message);
       throw err;
     }
   }
 
   afterInit(server: Server) {
-    console.log('[LOG]:[ChatsGateway:afterInit]: ', server);
+    this.logger.log('[afterInit]: ', server);
   }
 
-  handleConnection(client: Socket) {
-    console.log(
-      `[LOG][ChatsGateway:handleConnection]: Socket Connected ${client.id}`,
-    );
+  async handleConnection(client: Socket) {
+    this.logger.log(`[handleConnection]: Socket Connected ${client.id}`);
+    try {
+      const token = client.handshake.headers.authorization;
+      const user = await this.authService.varify(token);
+      if (!user) client.disconnect();
+    } catch (err) {
+      client.disconnect();
+    }
   }
 
   handleDisconnect(client: Socket) {
-    console.log(
-      `[LOG][ChatsGateway:handleDisconnect]: Socket Disconnected ${client.id}`,
-    );
+    this.logger.log(`[handleDisconnect]: Socket Disconnected ${client.id}`);
   }
 }

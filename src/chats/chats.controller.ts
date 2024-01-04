@@ -8,19 +8,13 @@ export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
 
   @UseGuards(AuthGuard)
-  @Get('hello')
-  Hello(): string {
-    return this.chatsService.getHello();
-  }
-
-  @UseGuards(AuthGuard)
   @Get('/all-chats')
   async Chat() {
     try {
       const messages = await this.chatsService.getMessages();
       return { data: messages, isSuccess: true, status: 200 };
     } catch (err) {
-      console.log(`[ERROR][ChatsController:Chat]: `, err);
+      console.log(`[ERROR][ChatsController:Chat]: `, err.message);
       return { error: err, isSuccess: false, status: 400 };
     }
   }
@@ -32,7 +26,7 @@ export class ChatsController {
       const resp = await this.chatsService.clearChats();
       return { data: resp, isSuccess: true, status: 200 };
     } catch (err) {
-      console.log(`[ERROR][ChatsController:ClearChats]: `, err);
+      console.log(`[ERROR][ChatsController:ClearChats]: `, err.message);
       return { error: err, isSuccess: false, status: 400 };
     }
   }
@@ -44,7 +38,7 @@ export class ChatsController {
       const rooms = await this.chatsService.getRooms();
       return { status: 200, isSuccess: true, data: rooms };
     } catch (err) {
-      console.log('[ERROR][ChatsController:AllRooms]: ', err);
+      console.log('[ERROR][ChatsController:AllRooms]: ', err.message);
       return { status: 400, isSuccess: false, error: err };
     }
   }
@@ -57,7 +51,7 @@ export class ChatsController {
       const room = await this.chatsService.getRoomByName(params.room);
       return { status: 200, isSuccess: true, data: rooms[room] };
     } catch (err) {
-      console.log('[ERROR][ChatsController:getRoom]: ', err);
+      console.log('[ERROR][ChatsController:getRoom]: ', err.message);
       return { status: 400, isSucces: false, error: err };
     }
   }

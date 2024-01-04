@@ -1,6 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from './constants';
+import { User } from 'src/users/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -9,7 +11,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(username: string, password: string) {
+  async signIn(username: string, password: string): Promise<object> {
     try {
       const user = await this.usersService.findOne(username);
       if (
@@ -21,18 +23,29 @@ export class AuthService {
         return { userName: user.userName, access_token };
       } else throw new UnauthorizedException();
     } catch (err) {
-      console.log('[ERROR][AuthService:signIn]: ', err);
+      console.log('[ERROR][AuthService:signIn]: ', err.message);
       throw err;
     }
   }
 
-  async signUp(username: string, password: string) {
+  async signUp(username: string, password: string): Promise<User> {
     try {
       const user = await this.usersService.createOne(username, password);
       return user;
     } catch (err) {
-      console.log('[ERROR][AuthService:signUp]: ', err);
+      console.log('[ERROR][AuthService:signUp]: ', err.message);
       throw err;
+    }
+  }
+
+  async varify(token: string): Promise<User> {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: jwtConstants.secret,
+      });
+      return payload;
+    } catch {
+      throw new UnauthorizedException();
     }
   }
 }
