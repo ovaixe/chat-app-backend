@@ -13,7 +13,8 @@ import { ChatsService } from './chats.service';
 import { AuthService } from 'src/auth/auth.service';
 import { UserInterface } from 'src/interfaces/user.interface';
 import { Message } from 'src/interfaces/chat.interface';
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
+import { WsAuthGuard } from './wsAuth.guard';
 
 @WebSocketGateway(8080, {
   cors: {
@@ -127,15 +128,19 @@ export class ChatsGateway
   async handleConnection(client: Socket) {
     this.logger.log(`[handleConnection]: Socket Connected ${client.id}`);
     try {
-      const token = client.handshake.headers.authorization;
+      const [type, token] =
+        client.handshake.headers.authorization?.split(' ') ?? [];
+      if (type !== 'Bearer') throw new Error('Unauthorized: Bad Token');
       const user = await this.authService.varify(token);
-      if (!user) client.disconnect();
+      if (!user) throw new Error('Unauthorized: User not found');
     } catch (err) {
+      this.logger.log(`[handleConnection]: ${err.message}, Disconnecting...`);
       client.disconnect();
     }
   }
 
   handleDisconnect(client: Socket) {
+    // this.chatsService.removeUserFromAllRooms()
     this.logger.log(`[handleDisconnect]: Socket Disconnected ${client.id}`);
   }
 }

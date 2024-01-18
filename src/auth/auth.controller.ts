@@ -2,10 +2,13 @@ import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/signIn.dto';
 import { SignUpDto } from './dto/signUp.dto';
+import { Logger } from '@nestjs/common';
 
 @Controller('api/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  private logger = new Logger('AuthController');
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
@@ -17,7 +20,7 @@ export class AuthController {
       );
       return { status: 200, isSuccess: true, data: user };
     } catch (err) {
-      console.log('[ERROR][AuthController:signIn]: ', err.message);
+      this.logger.log('[ERROR][AuthController:signIn]: ' + err.message);
       return { status: 400, isSuccess: false, error: err.message };
     }
   }
@@ -32,7 +35,7 @@ export class AuthController {
       );
       return { status: 200, isSuccess: true, data: user };
     } catch (err) {
-      console.log('[ERROR][AuthController:signUp]: ', err.message);
+      this.logger.log('[ERROR][AuthController:signUp]: ' + err.message);
       return { status: 400, isSuccess: false, error: err.message };
     }
   }

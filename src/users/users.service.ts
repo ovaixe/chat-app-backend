@@ -3,10 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+
+  private logger = new Logger('UsersService');
 
   async findOne(username: string): Promise<User> {
     try {
@@ -21,7 +24,7 @@ export class UsersService {
         throw new Error('No user found with this username!');
       }
     } catch (err) {
-      console.log('[ERROR][UsersService:findOne]: ', err.message);
+      this.logger.log('[ERROR][UsersService:findOne]: ' + err.message);
       throw err;
     }
   }
@@ -35,7 +38,7 @@ export class UsersService {
       });
       return await user.save();
     } catch (err) {
-      console.log('[ERROR][UsersService:createOne]: ', err.message);
+      this.logger.log('[ERROR][UsersService:createOne]: ' + err.message);
       if (err.code === 11000) {
         // Duplicate key error (e.g., unique index violation)
         throw new ConflictException('Username already exists');

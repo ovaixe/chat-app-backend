@@ -3,6 +3,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { User } from 'src/users/schemas/user.schema';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -10,6 +11,8 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
+
+  private logger = new Logger('AuthService');
 
   async signIn(username: string, password: string): Promise<object> {
     try {
@@ -21,9 +24,9 @@ export class AuthService {
         const payload = { username: user.userName, sub: user.password };
         const access_token = await this.jwtService.signAsync(payload);
         return { userName: user.userName, access_token };
-      } else throw new UnauthorizedException();
+      } else throw new UnauthorizedException('Invalid password');
     } catch (err) {
-      console.log('[ERROR][AuthService:signIn]: ', err.message);
+      this.logger.log('[ERROR][AuthService:signIn]: ' + err.message);
       throw err;
     }
   }
@@ -33,7 +36,7 @@ export class AuthService {
       const user = await this.usersService.createOne(username, password);
       return user;
     } catch (err) {
-      console.log('[ERROR][AuthService:signUp]: ', err.message);
+      this.logger.log('[ERROR][AuthService:signUp]: ' + err.message);
       throw err;
     }
   }
@@ -45,7 +48,7 @@ export class AuthService {
       });
       return payload;
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid token');
     }
   }
 }
