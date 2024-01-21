@@ -89,6 +89,10 @@ export class ChatsGateway
   ): Promise<boolean> {
     try {
       if (payload.user.socketId) {
+        this.logger.log(
+          `${payload.user.socketId} is leaving ${payload.roomName}`,
+        );
+
         this.server.in(payload.user.socketId).socketsLeave(payload.roomName);
         this.server.to(payload.roomName).emit('newIncomingMessage', {
           userName: 'Server',
