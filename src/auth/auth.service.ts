@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { User } from 'src/users/schemas/user.schema';
 import { Logger } from '@nestjs/common';
+import { LoggedInUser } from 'src/interfaces/user.interface';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
 
   private logger = new Logger('AuthService');
 
-  async signIn(username: string, password: string): Promise<object> {
+  async signIn(username: string, password: string): Promise<LoggedInUser> {
     try {
       const user = await this.usersService.findOne(username);
       if (
@@ -26,7 +27,7 @@ export class AuthService {
         return { userName: user.userName, access_token };
       } else throw new UnauthorizedException('Invalid password');
     } catch (err) {
-      this.logger.log('[ERROR][AuthService:signIn]: ' + err.message);
+      this.logger.error('[signIn]: ' + err.message);
       throw err;
     }
   }
@@ -36,7 +37,7 @@ export class AuthService {
       const user = await this.usersService.createOne(username, password);
       return user;
     } catch (err) {
-      this.logger.log('[ERROR][AuthService:signUp]: ' + err.message);
+      this.logger.error('[signUp]: ' + err.message);
       throw err;
     }
   }

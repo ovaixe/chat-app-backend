@@ -24,7 +24,7 @@ export class UsersService {
         throw new Error('No user found with this username!');
       }
     } catch (err) {
-      this.logger.log('[ERROR][UsersService:findOne]: ' + err.message);
+      this.logger.error('[findOne]: ' + err.message);
       throw err;
     }
   }
@@ -38,7 +38,7 @@ export class UsersService {
       });
       return await user.save();
     } catch (err) {
-      this.logger.log('[ERROR][UsersService:createOne]: ' + err.message);
+      this.logger.error('[createOne]: ' + err.message);
       if (err.code === 11000) {
         // Duplicate key error (e.g., unique index violation)
         throw new ConflictException('Username already exists');

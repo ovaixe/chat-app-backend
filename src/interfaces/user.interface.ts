@@ -3,7 +3,7 @@ export interface UserInterface {
   socketId: string;
 }
 
-export interface savedUser {
+export interface LoggedInUser {
   userName: string;
-  password: string;
+  access_token: string;
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Chat } from './schemas/chat.schema';
@@ -8,14 +8,16 @@ import { UserInterface } from '../interfaces/user.interface';
 @Injectable()
 export class ChatsService {
   constructor(@InjectModel(Chat.name) private chatModel: Model<Chat>) {}
+
   private rooms: Room[] = [];
+  private logger = new Logger('ChatsService');
 
   async createMessage(chat: Chat): Promise<Chat> {
     try {
       const createdMessage = new this.chatModel(chat);
       return createdMessage.save();
     } catch (err) {
-      console.log('[ERROR][ChatsService:createMessage]: ', err.message);
+      this.logger.error('[createMessage]: ' + err.message);
       throw err;
     }
   }
@@ -24,7 +26,7 @@ export class ChatsService {
     try {
       return await this.chatModel.find().exec();
     } catch (err) {
-      console.log('[ERROR][ChatsService:getMessages]: ', err.message);
+      this.logger.error('[getMessages]: ' + err.message);
       throw err;
     }
   }
@@ -34,7 +36,7 @@ export class ChatsService {
       const resp = await this.chatModel.deleteMany({});
       return resp;
     } catch (err) {
-      console.log('[ERROR][ChatsService:clearChats]: ', err.message);
+      this.logger.error('[clearChats]: ' + err.message);
       throw err;
     }
   }
@@ -48,7 +50,7 @@ export class ChatsService {
       }
       throw new Error('Room with same name already exists!');
     } catch (err) {
-      console.log('[Error][ChatsService:addRoom]: ', err.message);
+      this.logger.error('[addRoom]: ' + err.message);
       throw err;
     }
   }
@@ -60,7 +62,7 @@ export class ChatsService {
         this.rooms = this.rooms.filter((room) => room.name !== roomName);
       }
     } catch (err) {
-      console.log('[Error][ChatsService:removeRoom]: ', err.message);
+      this.logger.error('[removeRoom]: ' + err.message);
       throw err;
     }
   }
@@ -70,7 +72,7 @@ export class ChatsService {
       const roomIndex = await this.getRoomByName(hostName);
       return this.rooms[roomIndex].host;
     } catch (err) {
-      console.log('[Error][ChatsService:getRoomHost]: ', err.message);
+      this.logger.error('[getRoomHost]: ' + err.message);
       throw err;
     }
   }
@@ -80,7 +82,7 @@ export class ChatsService {
       const roomIndex = this.rooms.findIndex((room) => room?.name === roomName);
       return roomIndex;
     } catch (err) {
-      console.log('[Error][ChatsService:getRoomByName]: ', err.message);
+      this.logger.error('[getRoomByName]: ' + err.message);
       throw err;
     }
   }
@@ -100,7 +102,7 @@ export class ChatsService {
         return resp;
       }
     } catch (err) {
-      console.log('[Error][ChatsService:addUserToRoom]: ', err.message);
+      this.logger.error('[addUserToRoom]: ' + err.message);
       throw err;
     }
   }
@@ -115,10 +117,7 @@ export class ChatsService {
       });
       return filteredRooms;
     } catch (err) {
-      console.log(
-        '[Error][ChatsService:findRoomsByUserSocketId]: ',
-        err.message,
-      );
+      this.logger.error('[findRoomsByUserSocketId]: ' + err.message);
       throw err;
     }
   }
@@ -127,13 +126,10 @@ export class ChatsService {
     try {
       const rooms = await this.findRoomsByUserSocketId(socketId);
       for (const room of rooms) {
-        await this.removeUserFromRoom(socketId, room.name);
+        await this.removeUserFromRoom(room.name, socketId);
       }
     } catch (err) {
-      console.log(
-        '[Error][ChatsService:removeUserFromAllRooms]: ',
-        err.message,
-      );
+      this.logger.error('[removeUserFromAllRooms]: ' + err.message);
       throw err;
     }
   }
@@ -150,9 +146,12 @@ export class ChatsService {
       if (this.rooms[roomIndex].users.length === 0) {
         await this.removeRoom(roomName);
       }
+      if (this.rooms[roomIndex].host.socketId === socketId) {
+        this.rooms[roomIndex].host = this.rooms[roomIndex].users[0];
+      }
       return true;
     } catch (err) {
-      console.log('[Error][ChatsService:removeUserFromRoom]: ', err.message);
+      this.logger.error('[removeUserFromRoom]: ' + err.message);
       throw err;
     }
   }
@@ -172,7 +171,7 @@ export class ChatsService {
       return true;
     } catch (err) {
       err.scope = err.scope ? err.scope : 'isUserJoined';
-      console.log('[Error][ChatsService:isUserJoined]: ', err.message);
+      this.logger.error('[isUserJoined]: ' + err.message);
       throw err;
     }
   }

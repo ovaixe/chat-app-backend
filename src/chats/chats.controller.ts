@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Logger } from '@nestjs/common';
 import { ChatsService } from './chats.service';
 import { Room } from '../interfaces/chat.interface';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -7,14 +7,16 @@ import { AuthGuard } from 'src/auth/auth.guard';
 export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
 
+  private logger = new Logger('ChatsController');
+
   @UseGuards(AuthGuard)
   @Get('/all-chats')
-  async Chat() {
+  async AllChats() {
     try {
       const messages = await this.chatsService.getMessages();
       return { data: messages, isSuccess: true, status: 200 };
     } catch (err) {
-      console.log(`[ERROR][ChatsController:Chat]: `, err.message);
+      this.logger.error(`[AllChats]: ` + err.message);
       return { error: err, isSuccess: false, status: 400 };
     }
   }
@@ -26,7 +28,7 @@ export class ChatsController {
       const resp = await this.chatsService.clearChats();
       return { data: resp, isSuccess: true, status: 200 };
     } catch (err) {
-      console.log(`[ERROR][ChatsController:ClearChats]: `, err.message);
+      this.logger.error(`[ClearChats]: ` + err.message);
       return { error: err, isSuccess: false, status: 400 };
     }
   }
@@ -38,7 +40,7 @@ export class ChatsController {
       const rooms = await this.chatsService.getRooms();
       return { status: 200, isSuccess: true, data: rooms };
     } catch (err) {
-      console.log('[ERROR][ChatsController:AllRooms]: ', err.message);
+      this.logger.error('[AllRooms]: ' + err.message);
       return { status: 400, isSuccess: false, error: err };
     }
   }
@@ -51,7 +53,7 @@ export class ChatsController {
       const room = await this.chatsService.getRoomByName(params.room);
       return { status: 200, isSuccess: true, data: rooms[room] };
     } catch (err) {
-      console.log('[ERROR][ChatsController:getRoom]: ', err.message);
+      this.logger.error('[getRoom]: ' + err.message);
       return { status: 400, isSucces: false, error: err };
     }
   }

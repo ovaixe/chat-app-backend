@@ -13,8 +13,7 @@ import { ChatsService } from './chats.service';
 import { AuthService } from 'src/auth/auth.service';
 import { UserInterface } from 'src/interfaces/user.interface';
 import { Message } from 'src/interfaces/chat.interface';
-import { Logger, UseGuards } from '@nestjs/common';
-import { WsAuthGuard } from './wsAuth.guard';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(8080, {
   cors: {
@@ -45,7 +44,7 @@ export class ChatsGateway
       this.server.to(payload.roomName).emit('newIncomingMessage', payload);
       return true;
     } catch (err) {
-      this.logger.error('[handleMessage]: ', err.message);
+      this.logger.error('[handleMessage]: ' + err.message);
       return false;
     }
   }
@@ -78,7 +77,7 @@ export class ChatsGateway
         }
       } else return false;
     } catch (err) {
-      this.logger.error('[handleJoinRoom]: ', err.message);
+      this.logger.error('[handleJoinRoom]: ' + err.message);
       return false;
     }
   }
@@ -108,7 +107,7 @@ export class ChatsGateway
         return true;
       } else return false;
     } catch (err) {
-      this.logger.error('[handleLeaveRoom]: ', err.message);
+      this.logger.error('[handleLeaveRoom]: ' + err.message);
       return false;
     }
   }
@@ -121,6 +120,7 @@ export class ChatsGateway
       return true;
     } catch (err) {
       this.logger.error('[getAllRooms]: ', err.message);
+
       throw err;
     }
   }
@@ -143,8 +143,15 @@ export class ChatsGateway
     }
   }
 
-  handleDisconnect(client: Socket) {
-    // this.chatsService.removeUserFromAllRooms()
-    this.logger.log(`[handleDisconnect]: Socket Disconnected ${client.id}`);
+  async handleDisconnect(client: Socket) {
+    try {
+      await this.chatsService.removeUserFromAllRooms(client.id);
+
+      await this.getAllRooms();
+
+      this.logger.log(`[handleDisconnect]: Socket Disconnected ${client.id}`);
+    } catch (err: any) {
+      this.logger.error('[handleDisconnect]: ' + err.message);
+    }
   }
 }
