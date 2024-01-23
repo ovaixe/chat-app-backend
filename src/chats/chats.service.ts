@@ -67,10 +67,11 @@ export class ChatsService {
     }
   }
 
-  async getRoomHost(hostName: string): Promise<UserInterface> {
+  async getRoomHost(roomName: string): Promise<UserInterface> {
     try {
-      const roomIndex = await this.getRoomByName(hostName);
-      return this.rooms[roomIndex].host;
+      const roomIndex = await this.getRoomByName(roomName);
+      if (roomIndex !== -1) return this.rooms[roomIndex].host;
+      throw new Error('Room does not exist!');
     } catch (err) {
       this.logger.error('[getRoomHost]: ' + err.message);
       throw err;
@@ -145,8 +146,7 @@ export class ChatsService {
       );
       if (this.rooms[roomIndex].users.length === 0) {
         await this.removeRoom(roomName);
-      }
-      if (this.rooms[roomIndex].host.socketId === socketId) {
+      } else if (this.rooms[roomIndex].host.socketId === socketId) {
         this.rooms[roomIndex].host = this.rooms[roomIndex].users[0];
       }
       return true;
