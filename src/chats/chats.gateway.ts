@@ -39,8 +39,8 @@ export class ChatsGateway
     @MessageBody() payload: Message,
   ): Promise<boolean> {
     try {
+      this.logger.log('newMsg: ' + JSON.stringify(payload));
       await this.chatsService.createMessage(payload);
-      this.logger.log('newMsg: ', payload);
       this.server.to(payload.roomName).emit('newIncomingMessage', payload);
       return true;
     } catch (err) {
