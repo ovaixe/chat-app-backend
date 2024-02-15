@@ -8,6 +8,6 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 8082
+EXPOSE 8000
 
 CMD npm run start:dev

@@ -8,7 +8,11 @@ services:
     
     # do port mapping so that we can access the app from the browser
     ports:
-      - 8082:8082
+      - 8000:8000
+
+    volumes:
+      - .:/app/backend
+      - /app/backend/node_modules
     
     # use docker compose to watch for changes and rebuild the container
     develop:
