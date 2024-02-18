@@ -63,26 +63,26 @@ $ npm run test:cov
 
 ### Authentication
 
-- POST /api/auth/signup: Register a new user.
-- POST /api/auth/login: Log in an existing user.
+-     POST /api/auth/signup: Register a new user.
+-     POST /api/auth/login: Log in an existing user.
 
 ### Chat Rooms
 
-- GET /api/chats/all-chats: Get all chats from database.
-- GET /api/chats/clear-chats: Clear all chats from database.
-- GET /api/chats/all-rooms: Get all chat rooms from database.
-- GET /api/chats/rooms/:roomName: Get a single chat room from database.
-- GET /api/chats/room-host/:roomName: Get room host of a room from database.
+-     GET /api/chats/all-chats: Get all chats from database.
+-     GET /api/chats/clear-chats: Clear all chats from database.
+-     GET /api/chats/all-rooms: Get all chat rooms from database.
+-     GET /api/chats/rooms/:roomName: Get a single chat room from database.
+-     GET /api/chats/room-host/:roomName: Get room host of a room from database.
 
 ## WebSocket
 
-### WebSocket endpoint for real-time messaging:
+#### WebSocket endpoint for real-time messaging:
 
 -     ws://localhost:8080
 
 ## MongoDB Setup
 
-### Configure MongoDB Connection String:
+#### Configure MongoDB Connection String:
 
 - Update the MONGO_DB_URL in the .env file with your MongoDB connection string.
 
@@ -99,7 +99,7 @@ If you'd like to contribute to this project, you are welcome.
 
 ## Stay in touch
 
-- Author - [Bhat Owais](https://ovaixe.vercel.app)
+- Author - [Bhat Owais](https://github.com/ovaixe)
 - Website - [https://ovaixe.vercel.app](https://ovaixe.vercel.app)
 - Twitter - [@ovaixe](https://twitter.com/ovaixe)
 
