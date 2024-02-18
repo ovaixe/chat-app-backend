@@ -80,6 +80,13 @@ $ npm run test:cov
 
 -     ws://localhost:8080
 
+#### WebSocket (Socket.IO) Events
+
+-     joinRoom: Join a room or create a new room
+-     leaveRoom: Leave a room
+-     getRooms: Get a list of existing rooms
+-     sendMessage: Send a message to a room
+
 ## MongoDB Setup
 
 #### Configure MongoDB Connection String:
