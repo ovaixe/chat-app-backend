@@ -9,6 +9,7 @@ services:
     # do port mapping so that we can access the app from the browser
     ports:
       - 8000:8000
+      - 8080:8080
 
     volumes:
       - .:/app/backend
