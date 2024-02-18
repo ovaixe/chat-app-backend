@@ -1,35 +1,34 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This project is a chat application built using Nest.js, providing user authentication and chat services. It allows users to create chat rooms, join existing rooms, and engage in real-time conversations.
+
+## Features
+
+- User Authentication: Secure user authentication to manage user accounts and sessions.
+- Chat Rooms: Create and join chat rooms for group conversations.
+- Real-time Messaging: Instant messaging using WebSocket for real-time communication.
+- MongoDB Integration: Utilizes MongoDB as the database for storing user information and chat data.
 
 ## Installation
 
+### Clone the repository:
+
 ```bash
+$ git clone https://github.com/ovaixe/chat-app-backend.git
+```
+
+### Install dependencies:
+
+```bash
+$ cd chat-app-backend
 $ npm install
+```
+
+### Set up environment variables:
+#### Create a .env file in the root directory and configure the following variables:
+
+```bash
+$ MONGO_DB_URL='your mongodb url'
 ```
 
 ## Running the app
@@ -45,6 +44,8 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+#### The application will be accessible at http://localhost:8000.
+
 ## Test
 
 ```bash
@@ -58,16 +59,57 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+## API Endpoints
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Authentication
+
+- POST /api/auth/signup: Register a new user.
+- POST /api/auth/login: Log in an existing user.
+
+### Chat Rooms
+
+- GET /api/chats/all-chats: Get all chats from database.
+- GET /api/chats/clear-chats: Clear all chats from database.
+- GET /api/chats/all-rooms: Get all chat rooms from database.
+- GET /api/chats/rooms/:roomName: Get a single chat room from database.
+- GET /api/chats/room-host/:roomName: Get room host of a room from database.
+
+## WebSocket
+
+### WebSocket endpoint for real-time messaging:
+
+-     ws://localhost:8080
+
+## MongoDB Setup
+
+### Configure MongoDB Connection String:
+
+- Update the MONGO_DB_URL in the .env file with your MongoDB connection string.
+
+## Usage
+
+- Register a new user using the /api/auth/signup endpoint.
+- Log in using the /api/auth/login endpoint to obtain an authentication token.
+- Use the token for authentication when making requests to create or join chat rooms.
+- Utilize WebSocket for real-time messaging within the chat rooms.
+
+## Contributing
+
+If you'd like to contribute to this project, you are welcome.
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Author - [Bhat Owais](https://ovaixe.vercel.app)
+- Website - [https://ovaixe.vercel.app](https://ovaixe.vercel.app)
+- Twitter - [@ovaixe](https://twitter.com/ovaixe)
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+This project is [MIT licensed](LICENSE).
+
+## Acknowledgments
+
+- Mention any libraries, frameworks, or tools you used.
+- Provide credits to authors or contributors of external code.
+
+Feel free to adapt this template further based on your project's specific needs.

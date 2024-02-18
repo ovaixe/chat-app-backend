@@ -1,10 +1,10 @@
 {
   "name": "chat-app-backend",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "This project is a chat application built using Nest.js, providing user authentication and chat services. It allows users to create chat rooms, join existing rooms, and engage in real-time conversations.",
+  "author": "Bhat Owais",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "LICENSED",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
