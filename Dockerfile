@@ -4,12 +4,12 @@ WORKDIR /app/backend
 
 COPY package*.json ./
 
-RUN npm install --production
+RUN npm install
 
-RUN npm run build
+# RUN npm run build
 
 COPY . .
 
 EXPOSE 8000 8080
 
-CMD npm run start:prod
+CMD npm run start:dev
