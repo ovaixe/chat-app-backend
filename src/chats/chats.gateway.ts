@@ -125,6 +125,20 @@ export class ChatsGateway
     }
   }
 
+  @SubscribeMessage('getRoomHost')
+  async getRoomHost(
+    @MessageBody() payload: { roomName: string },
+  ): Promise<boolean> {
+    try {
+      const host = await this.chatsService.getRoomHost(payload.roomName);
+      this.server.to(payload.roomName).emit('roomHost', host);
+      return true;
+    } catch (err) {
+      this.logger.error('[getRoomHost]: ', err.message);
+      throw err;
+    }
+  }
+
   afterInit(server: Server) {
     this.logger.log('[afterInit]: ', server);
   }
