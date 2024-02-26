@@ -85,6 +85,7 @@ $ npm run test:cov
 -     joinRoom: Join a room or create a new room
 -     leaveRoom: Leave a room
 -     getRooms: Get a list of existing rooms
+-     getRoomHost: Get host user of a room
 -     sendMessage: Send a message to a room
 
 ## MongoDB Setup
