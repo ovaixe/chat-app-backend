@@ -92,24 +92,34 @@ export class ChatsGateway
           `${payload.user.socketId} is leaving ${payload.roomName}`,
         );
 
+        const hostUser = await this.chatsService.getRoomHost(payload.roomName);
+
         this.server.in(payload.user.socketId).socketsLeave(payload.roomName);
+        await this.chatsService.removeUserFromRoom(
+          payload.roomName,
+          payload.user.socketId,
+        );
+
         this.server.to(payload.roomName).emit('newIncomingMessage', {
           userName: 'Server',
           timeSent: new Date(),
           message: `${payload.user.userName} left the room`,
           roomName: payload.roomName,
         });
-        await this.chatsService.removeUserFromRoom(
-          payload.roomName,
-          payload.user.socketId,
-        );
-        const newHost = await this.chatsService.getRoomHost(payload.roomName);
-        this.server.to(payload.roomName).emit('newIncomingMessage', {
-          userName: 'Server',
-          timeSent: new Date(),
-          message: `${newHost.userName} is host now`,
-          roomName: payload.roomName,
-        });
+
+        if (hostUser.userName === payload.user.userName) {
+          const newHost = await this.chatsService.getRoomHost(payload.roomName);
+
+          this.server.to(payload.roomName).emit('newIncomingMessage', {
+            userName: 'Server',
+            timeSent: new Date(),
+            message: `${newHost.userName} is host now`,
+            roomName: payload.roomName,
+          });
+
+          await this.getRoomHost({ roomName: payload.roomName });
+        }
+
         await this.getAllRooms();
         return true;
       } else return false;
@@ -135,11 +145,11 @@ export class ChatsGateway
   @SubscribeMessage('getRoomHost')
   async getRoomHost(
     @MessageBody() payload: { roomName: string },
-  ): Promise<UserInterface | boolean> {
+  ): Promise<boolean> {
     try {
       const host = await this.chatsService.getRoomHost(payload.roomName);
       this.server.to(payload.roomName).emit('roomHost', host);
-      return host;
+      return true;
     } catch (err) {
       this.logger.error('[getRoomHost]: ' + err.message);
       return false;
