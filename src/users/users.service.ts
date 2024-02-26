@@ -21,7 +21,7 @@ export class UsersService {
         const user: User = { userName, password };
         return user;
       } else {
-        throw new Error('No user found with this username!');
+        throw new Error('User not found with this username!');
       }
     } catch (err) {
       this.logger.error('[findOne]: ' + err.message);
