@@ -1,4 +1,8 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
@@ -12,20 +16,13 @@ export class UsersService {
   private logger = new Logger('UsersService');
 
   async findOne(username: string): Promise<User> {
-    try {
-      const userDoc = await this.userModel
-        .findOne({ userName: username })
-        .exec();
-      if (userDoc) {
-        const { userName, password } = userDoc;
-        const user: User = { userName, password };
-        return user;
-      } else {
-        throw new Error('User not found with this username!');
-      }
-    } catch (err) {
-      this.logger.error('[findOne]: ' + err.message);
-      throw err;
+    const userDoc = await this.userModel.findOne({ userName: username }).exec();
+    if (userDoc) {
+      const { userName, password } = userDoc;
+      const user: User = { userName, password };
+      return user;
+    } else {
+      throw new NotFoundException('User not found with this username!');
     }
   }
 

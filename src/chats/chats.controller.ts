@@ -1,8 +1,17 @@
-import { Controller, Get, Param, UseGuards, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Param,
+  UseGuards,
+  Logger,
+  Res,
+  HttpStatus,
+  HttpException,
+} from '@nestjs/common';
+import { Response } from 'express';
 import { ChatsService } from './chats.service';
-import { Room } from '../interfaces/chat.interface';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { UserInterface } from 'src/interfaces/user.interface';
 
 @Controller('api/chats')
 export class ChatsController {
@@ -12,64 +21,101 @@ export class ChatsController {
 
   @UseGuards(AuthGuard)
   @Get('/all-chats')
-  async AllChats() {
+  async AllChats(@Res() res: Response) {
     try {
       const messages = await this.chatsService.getMessages();
-      return { data: messages, isSuccess: true, status: 200 };
+      res
+        .status(HttpStatus.OK)
+        .json({ data: messages, isSuccess: true, status: 200 });
     } catch (err) {
       this.logger.error(`[AllChats]: ` + err.message);
-      return { error: err.message, isSuccess: false, status: 400 };
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ error: err.message, isSuccess: false, status: 400 });
     }
   }
 
   @UseGuards(AuthGuard)
   @Get('/clear-chats')
-  async ClearChats() {
+  async ClearChats(@Res() res: Response) {
     try {
       const resp = await this.chatsService.clearChats();
-      return { data: resp, isSuccess: true, status: 200 };
+      res
+        .status(HttpStatus.OK)
+        .json({ data: resp, isSuccess: true, status: 200 });
     } catch (err) {
       this.logger.error(`[ClearChats]: ` + err.message);
-      return { error: err.message, isSuccess: false, status: 400 };
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ error: err.message, isSuccess: false, status: 400 });
     }
   }
 
   @UseGuards(AuthGuard)
   @Get('/all-rooms')
-  async AllRooms() {
+  async AllRooms(@Res() res: Response) {
     try {
       const rooms = await this.chatsService.getRooms();
-      return { status: 200, isSuccess: true, data: rooms };
+      res
+        .status(HttpStatus.OK)
+        .json({ status: 200, isSuccess: true, data: rooms });
     } catch (err) {
       this.logger.error('[AllRooms]: ' + err.message);
-      return { status: 400, isSuccess: false, error: err.message };
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ status: 400, isSuccess: false, error: err.message });
     }
   }
 
   @UseGuards(AuthGuard)
   @Get('/rooms/:roomName')
-  async getRoom(@Param('roomName') roomName: string): Promise<Room | object> {
+  async getRoom(@Res() res: Response, @Param('roomName') roomName: string) {
     try {
       const rooms = await this.chatsService.getRooms();
       const room = await this.chatsService.getRoomByName(roomName);
-      return { status: 200, isSuccess: true, data: rooms[room] };
+      res
+        .status(HttpStatus.OK)
+        .json({ status: 200, isSuccess: true, data: rooms[room] });
     } catch (err) {
       this.logger.error('[getRoom]: ' + err.message);
-      return { status: 400, isSucces: false, error: err.message };
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ status: 400, isSucces: false, error: err.message });
     }
   }
 
   @UseGuards(AuthGuard)
-  @Get('/room-host/:roomName')
+  @Get('/room-host')
   async getRoomHost(
-    @Param('roomName') roomName: string,
-  ): Promise<UserInterface | object> {
+    @Res() res: Response,
+    @Query('roomName') roomName: string,
+    // @Param('roomName') roomName: string,
+  ) {
     try {
       const host = await this.chatsService.getRoomHost(roomName);
-      return { status: 200, isSuccess: true, data: host };
+      res
+        .status(HttpStatus.OK)
+        .json({ status: 200, isSuccess: true, data: host });
     } catch (err) {
       this.logger.error('[getRoomHost]: ' + err.message);
-      return { status: 400, isSuccess: false, error: err.message };
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ status: 400, isSuccess: false, error: err.message });
     }
   }
 }
