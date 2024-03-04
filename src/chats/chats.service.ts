@@ -1,4 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Chat } from './schemas/chat.schema';
@@ -18,7 +24,7 @@ export class ChatsService {
       return createdMessage.save();
     } catch (err) {
       this.logger.error('[createMessage]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to create message');
     }
   }
 
@@ -27,7 +33,7 @@ export class ChatsService {
       return await this.chatModel.find().exec();
     } catch (err) {
       this.logger.error('[getMessages]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to get messages');
     }
   }
 
@@ -37,7 +43,7 @@ export class ChatsService {
       return resp;
     } catch (err) {
       this.logger.error('[clearChats]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to delete messages');
     }
   }
 
@@ -48,10 +54,10 @@ export class ChatsService {
         this.rooms.push({ name: roomName, host, users: [host] });
         return true;
       }
-      throw new Error('Room with same name already exists!');
+      throw new ConflictException('Room with same name already exists!');
     } catch (err) {
       this.logger.error('[addRoom]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to create room');
     }
   }
 
@@ -60,10 +66,14 @@ export class ChatsService {
       const findRoom = await this.getRoomByName(roomName);
       if (findRoom !== -1) {
         this.rooms = this.rooms.filter((room) => room.name !== roomName);
+      } else {
+        throw new NotFoundException(
+          `Failed to remove room, room with name ${roomName} does not exist'`,
+        );
       }
     } catch (err) {
       this.logger.error('[removeRoom]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to remove room');
     }
   }
 
@@ -71,10 +81,10 @@ export class ChatsService {
     try {
       const roomIndex = await this.getRoomByName(roomName);
       if (roomIndex !== -1) return this.rooms[roomIndex].host;
-      throw new Error('Room does not exist!');
+      throw new NotFoundException(`Room with name ${roomName} does not exist!`);
     } catch (err) {
       this.logger.error('[getRoomHost]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to get room host');
     }
   }
 
@@ -84,7 +94,7 @@ export class ChatsService {
       return roomIndex;
     } catch (err) {
       this.logger.error('[getRoomByName]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to get room');
     }
   }
 
@@ -104,7 +114,7 @@ export class ChatsService {
       }
     } catch (err) {
       this.logger.error('[addUserToRoom]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to add user to room');
     }
   }
 
@@ -119,7 +129,7 @@ export class ChatsService {
       return filteredRooms;
     } catch (err) {
       this.logger.error('[findRoomsByUserSocketId]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to find rooms');
     }
   }
 
@@ -131,7 +141,9 @@ export class ChatsService {
       }
     } catch (err) {
       this.logger.error('[removeUserFromAllRooms]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException(
+        'Failed to remove user from all rooms',
+      );
     }
   }
 
@@ -152,7 +164,7 @@ export class ChatsService {
       return true;
     } catch (err) {
       this.logger.error('[removeUserFromRoom]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to remove user from room');
     }
   }
 
@@ -172,7 +184,7 @@ export class ChatsService {
     } catch (err) {
       err.scope = err.scope ? err.scope : 'isUserJoined';
       this.logger.error('[isUserJoined]: ' + err.message);
-      throw err;
+      throw new InternalServerErrorException('Failed to get user from room');
     }
   }
 }
