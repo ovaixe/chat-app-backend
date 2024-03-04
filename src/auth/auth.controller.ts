@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Res,
   HttpException,
+  UseFilters,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -14,6 +15,7 @@ import { SignUpDto } from './dto/signUp.dto';
 import { Logger } from '@nestjs/common';
 import { User } from 'src/users/schemas/user.schema';
 import { LoggedInUser } from 'src/interfaces/user.interface';
+import { HttpExceptionFilter } from '../exception-filters/http-exception.filter';
 
 @Controller('api/auth')
 export class AuthController {
@@ -21,6 +23,7 @@ export class AuthController {
 
   private logger = new Logger('AuthController');
 
+  @UseFilters(new HttpExceptionFilter())
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async signIn(@Res() res: Response, @Body() signInDto: SignInDto) {
@@ -44,6 +47,7 @@ export class AuthController {
     }
   }
 
+  @UseFilters(new HttpExceptionFilter())
   @HttpCode(HttpStatus.OK)
   @Post('signup')
   async signUp(@Res() res: Response, @Body() signUpDto: SignUpDto) {

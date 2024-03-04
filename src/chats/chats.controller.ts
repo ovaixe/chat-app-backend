@@ -8,10 +8,12 @@ import {
   Res,
   HttpStatus,
   HttpException,
+  UseFilters,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ChatsService } from './chats.service';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { HttpExceptionFilter } from 'src/exception-filters/http-exception.filter';
 
 @Controller('api/chats')
 export class ChatsController {
@@ -19,6 +21,7 @@ export class ChatsController {
 
   private logger = new Logger('ChatsController');
 
+  @UseFilters(new HttpExceptionFilter())
   @UseGuards(AuthGuard)
   @Get('/all-chats')
   async AllChats(@Res() res: Response) {
@@ -38,6 +41,7 @@ export class ChatsController {
     }
   }
 
+  @UseFilters(new HttpExceptionFilter())
   @UseGuards(AuthGuard)
   @Get('/clear-chats')
   async ClearChats(@Res() res: Response) {
@@ -57,6 +61,7 @@ export class ChatsController {
     }
   }
 
+  @UseFilters(new HttpExceptionFilter())
   @UseGuards(AuthGuard)
   @Get('/all-rooms')
   async AllRooms(@Res() res: Response) {
@@ -76,6 +81,7 @@ export class ChatsController {
     }
   }
 
+  @UseFilters(new HttpExceptionFilter())
   @UseGuards(AuthGuard)
   @Get('/rooms/:roomName')
   async getRoom(@Res() res: Response, @Param('roomName') roomName: string) {
@@ -96,6 +102,7 @@ export class ChatsController {
     }
   }
 
+  @UseFilters(new HttpExceptionFilter())
   @UseGuards(AuthGuard)
   @Get('/room-host')
   async getRoomHost(
