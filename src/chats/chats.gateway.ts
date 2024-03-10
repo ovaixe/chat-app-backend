@@ -17,7 +17,8 @@ import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(8080, {
   cors: {
-    origin: '*',
+    origin:
+      process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000'],
   },
 })
 export class ChatsGateway
