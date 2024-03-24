@@ -7,12 +7,13 @@ import {
   OnGatewayDisconnect,
   ConnectedSocket,
   MessageBody,
+  WsException,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { ChatsService } from './chats.service';
 import { AuthService } from 'src/auth/auth.service';
 import { UserInterface } from 'src/interfaces/user.interface';
-import { Message } from 'src/interfaces/chat.interface';
+import { Message, DirectMessage } from 'src/interfaces/chat.interface';
 import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(8080, {
@@ -157,6 +158,34 @@ export class ChatsGateway
     }
   }
 
+  @SubscribeMessage('activeUsers')
+  async getActiveUsers(): Promise<boolean> {
+    const activeUsers = [];
+    for (const [id, socket] of this.server.of('/').sockets) {
+      activeUsers.push({
+        socketId: id,
+        userName: socket['userName'],
+        messages: [],
+        hasNewMessages: false,
+      });
+    }
+    this.server.emit('activeUsers', activeUsers);
+    return true;
+  }
+
+  @SubscribeMessage('direct-message')
+  async handleDirectMessage(
+    @ConnectedSocket()
+    client: Socket,
+    @MessageBody() payload: { message: DirectMessage; to: string },
+  ): Promise<boolean> {
+    console.log('direct-message >>>', payload.message);
+    this.server
+      .to(payload.to)
+      .emit('direct-message', { message: payload.message, from: client.id });
+    return true;
+  }
+
   afterInit(server: Server) {
     this.logger.log('[afterInit]: ', server);
   }
@@ -164,11 +193,10 @@ export class ChatsGateway
   async handleConnection(client: Socket) {
     this.logger.log(`[handleConnection]: Socket Connected <${client.id}>`);
     try {
-      const [type, token] =
-        client.handshake.headers.authorization?.split(' ') ?? [];
-      if (type !== 'Bearer') throw new Error('Unauthorized: Bad Token');
-      const user = await this.authService.varify(token);
-      if (!user) throw new Error('Unauthorized: User not found');
+      const userName = await this.varifyUser(client);
+      client['userName'] = userName;
+
+      await this.getActiveUsers();
     } catch (err) {
       this.logger.log(`[handleConnection]: ${err.message}, Disconnecting...`);
       client.disconnect();
@@ -181,9 +209,32 @@ export class ChatsGateway
 
       await this.getAllRooms();
 
+      await this.getActiveUsers();
+
       this.logger.log(`[handleDisconnect]: Socket Disconnected <${client.id}>`);
     } catch (err: any) {
       this.logger.error('[handleDisconnect]: ' + err.message);
     }
+  }
+
+  private async varifyUser(client: Socket) {
+    const token = this.extractTokenFromHeader(client);
+    if (!token) {
+      throw new WsException('Unauthorized');
+    }
+    const user = await this.authService.varify(token);
+    if (!user) throw new WsException('Unauthorized: User not found');
+    return this.extractUserFromHeader(client);
+  }
+
+  private extractTokenFromHeader(client: Socket): string | undefined {
+    const [type, token] =
+      client.handshake.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
+  }
+
+  private extractUserFromHeader(client: Socket): string | undefined {
+    const user: string = client.handshake.headers.user as string;
+    return user;
   }
 }
