@@ -105,11 +105,7 @@ export class ChatsController {
   @UseFilters(new HttpExceptionFilter())
   @UseGuards(AuthGuard)
   @Get('/room-host')
-  async getRoomHost(
-    @Res() res: Response,
-    @Query('roomName') roomName: string,
-    // @Param('roomName') roomName: string,
-  ) {
+  async getRoomHost(@Res() res: Response, @Query('roomName') roomName: string) {
     try {
       const host = await this.chatsService.getRoomHost(roomName);
       res

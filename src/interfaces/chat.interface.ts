@@ -1,5 +1,11 @@
 import { UserInterface } from './user.interface';
 
+export interface DirectMessage {
+  content: string;
+  timeSent: Date;
+  fromSelf: boolean;
+}
+
 export interface Message {
   userName: string;
   timeSent: Date;
