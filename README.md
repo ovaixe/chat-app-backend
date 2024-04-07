@@ -1,11 +1,12 @@
 ## Description
 
-This project is a chat application built using Nest.js, providing user authentication and chat services. It allows users to create chat rooms, join existing rooms, and engage in real-time conversations.
+This project is a chat application built using Nest.js, providing user authentication and chat services. It allows users to create chat rooms, join existing rooms, send private messages to other users, and engage in real-time conversations.
 
 ## Features
 
 - User Authentication: Secure user authentication to manage user accounts and sessions.
 - Chat Rooms: Create and join chat rooms for group conversations.
+- Private Messages: Send private messages to other users.
 - Real-time Messaging: Instant messaging using WebSocket for real-time communication.
 - MongoDB Integration: Utilizes MongoDB as the database for storing user information and chat data.
 
@@ -87,6 +88,8 @@ $ npm run test:cov
 -     getRooms: Get a list of existing rooms
 -     getRoomHost: Get host user of a room
 -     sendMessage: Send a message to a room
+-     direct-message: Send a private message to a user
+-     activeUsers: Get active users
 
 ## MongoDB Setup
 
